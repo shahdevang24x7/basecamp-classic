@@ -14,44 +14,44 @@ import org.w3c.dom.NodeList;
  *
  */
 public class People extends BaseCampEntity {
-	
+
 	private List<Person> people = new ArrayList<Person>();
 	private int personCount = 0;
 
 	/***
 	 * Get All People
 	 * 
-	 * @param auth	BCAuth
+	 * @param auth
+	 *            BCAuth
 	 */
 	public People(BCAuth auth) {
-		
+
 		super(auth);
-		
+
 		Element peopleElement = super.get("/people.xml");
-		
-		//get entry NodeList
+
+		// get entry NodeList
 		NodeList nl = peopleElement.getElementsByTagName("person");
-		
-		for (int i=0;i<nl.getLength();i++) {
+
+		for (int i = 0; i < nl.getLength(); i++) {
 			Element personElement = (Element) nl.item(i);
 			Person person = new Person(auth, personElement);
 			this.people.add(person);
 			this.personCount++;
 		}
-		
-		
+
 	}
-	
-	//TODO - Enable Getting Company/Project People
-	
+
+	// TODO - Enable Getting Company/Project People
+
 	public List<Person> getPeople() {
 		return this.people;
 	}
-	
+
 	public Person getEntry(int id) {
 		return this.people.get(id);
 	}
-	
+
 	public int getEntryCount() {
 		return this.personCount;
 	}

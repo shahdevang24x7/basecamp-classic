@@ -8,20 +8,20 @@ import org.w3c.dom.Element;
  * @author jondavidjohn
  *
  */
-public class Company extends BaseCampEntity{
-	
-	private int 	id;
-	private String 	name;
-	private String 	address1;
-	private String 	address2;
-	private String 	city;
-	private String 	state;
-	private int		zip;
-	private String 	country;
-	private String 	webAddress;
-	private String 	phoneOffice;
-	private String 	phoneFax;
-	private String 	timeZoneId;
+public class Company extends BaseCampEntity {
+
+	private int id;
+	private String name;
+	private String address1;
+	private String address2;
+	private String city;
+	private String state;
+	private int zip;
+	private String country;
+	private String webAddress;
+	private String phoneOffice;
+	private String phoneFax;
+	private String timeZoneId;
 	private boolean canSeePrivate;
 
 	/***
@@ -29,61 +29,64 @@ public class Company extends BaseCampEntity{
 	 * 
 	 * Builds Company Object from ID.
 	 * 
-	 * @param auth		BaseCamp Auth Object
-	 * @param companyId	ID of company
+	 * @param auth
+	 *            BaseCamp Auth Object
+	 * @param companyId
+	 *            ID of company
 	 */
 	public Company(BCAuth auth, int companyId) {
-		
+
 		super(auth);
-		
-		Element companyElement = super.get("/companies/"+companyId+".xml");
-		
-		this.id				= companyId;
-		this.name 			= ElementValue.getTextValue(companyElement, "name");
-		this.address1 		= ElementValue.getTextValue(companyElement, "address-one");
-		this.address2 		= ElementValue.getTextValue(companyElement, "address-two");
-		this.city 			= ElementValue.getTextValue(companyElement, "city");
-		this.state 			= ElementValue.getTextValue(companyElement, "state");
-		this.zip 			= ElementValue.getIntValue(companyElement,  "zip");
-		this.country 		= ElementValue.getTextValue(companyElement, "country");
-		this.webAddress 	= ElementValue.getTextValue(companyElement, "country");
-		this.phoneOffice 	= ElementValue.getTextValue(companyElement, "phone-number-office");
-		this.phoneFax 		= ElementValue.getTextValue(companyElement, "phone-number-fax");
-		this.timeZoneId 	= ElementValue.getTextValue(companyElement, "time-zone-id");
-		this.canSeePrivate 	= ElementValue.getBoolValue(companyElement, "can-see-private");
-		
+
+		Element companyElement = super.get("/companies/" + companyId + ".xml");
+
+		this.id = companyId;
+		this.name = ElementValue.getTextValue(companyElement, "name");
+		this.address1 = ElementValue.getTextValue(companyElement, "address-one");
+		this.address2 = ElementValue.getTextValue(companyElement, "address-two");
+		this.city = ElementValue.getTextValue(companyElement, "city");
+		this.state = ElementValue.getTextValue(companyElement, "state");
+		this.zip = ElementValue.getIntValue(companyElement, "zip");
+		this.country = ElementValue.getTextValue(companyElement, "country");
+		this.webAddress = ElementValue.getTextValue(companyElement, "country");
+		this.phoneOffice = ElementValue.getTextValue(companyElement, "phone-number-office");
+		this.phoneFax = ElementValue.getTextValue(companyElement, "phone-number-fax");
+		this.timeZoneId = ElementValue.getTextValue(companyElement, "time-zone-id");
+		this.canSeePrivate = ElementValue.getBoolValue(companyElement, "can-see-private");
+
 	}
-		
+
 	/***
 	 * Build Company from XML Element
 	 * 
 	 * (Internal Use Only)
 	 * 
-	 * @param auth				BCAuth Object
-	 * @param companyElement	XML Element representing Company
+	 * @param auth
+	 *            BCAuth Object
+	 * @param companyElement
+	 *            XML Element representing Company
 	 */
 	Company(BCAuth auth, Element companyElement) {
-		
+
 		super(auth);
-				
-		this.id				= ElementValue.getIntValue(companyElement,  "id");
-		this.name 			= ElementValue.getTextValue(companyElement, "name");
-		this.address1 		= ElementValue.getTextValue(companyElement, "address-one");
-		this.address2 		= ElementValue.getTextValue(companyElement, "address-two");
-		this.city 			= ElementValue.getTextValue(companyElement, "city");
-		this.state 			= ElementValue.getTextValue(companyElement, "state");
-		this.zip 			= ElementValue.getIntValue(companyElement,  "zip");
-		this.country 		= ElementValue.getTextValue(companyElement, "country");
-		this.webAddress 	= ElementValue.getTextValue(companyElement, "country");
-		this.phoneOffice 	= ElementValue.getTextValue(companyElement, "phone-number-office");
-		this.phoneFax 		= ElementValue.getTextValue(companyElement, "phone-number-fax");
-		this.timeZoneId 	= ElementValue.getTextValue(companyElement, "time-zone-id");
-		this.canSeePrivate 	= ElementValue.getBoolValue(companyElement, "can-see-private");
-		
-	}	
-	
-	
-	//--- Getters
+
+		this.id = ElementValue.getIntValue(companyElement, "id");
+		this.name = ElementValue.getTextValue(companyElement, "name");
+		this.address1 = ElementValue.getTextValue(companyElement, "address-one");
+		this.address2 = ElementValue.getTextValue(companyElement, "address-two");
+		this.city = ElementValue.getTextValue(companyElement, "city");
+		this.state = ElementValue.getTextValue(companyElement, "state");
+		this.zip = ElementValue.getIntValue(companyElement, "zip");
+		this.country = ElementValue.getTextValue(companyElement, "country");
+		this.webAddress = ElementValue.getTextValue(companyElement, "country");
+		this.phoneOffice = ElementValue.getTextValue(companyElement, "phone-number-office");
+		this.phoneFax = ElementValue.getTextValue(companyElement, "phone-number-fax");
+		this.timeZoneId = ElementValue.getTextValue(companyElement, "time-zone-id");
+		this.canSeePrivate = ElementValue.getBoolValue(companyElement, "can-see-private");
+
+	}
+
+	// --- Getters
 
 	public int getId() {
 		return id;
@@ -136,7 +139,5 @@ public class Company extends BaseCampEntity{
 	public boolean canSeePrivate() {
 		return canSeePrivate;
 	}
-	
-	
 
 }

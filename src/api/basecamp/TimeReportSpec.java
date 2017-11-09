@@ -10,11 +10,11 @@ import java.util.Calendar;
  *
  */
 public class TimeReportSpec {
-	
-	public int 		subject_id = 0;
+
+	public int subject_id = 0;
 	public Calendar to = null;
 	public Calendar from = null;
-	public int 		filterProjectId = 0;
-	public int 		filterCompanyId = 0;
-	
+	public int filterProjectId = 0;
+	public int filterCompanyId = 0;
+
 }

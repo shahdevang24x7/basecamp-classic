@@ -13,8 +13,8 @@ import org.w3c.dom.NodeList;
  * @author jondavidjohn
  *
  */
-public class Comments extends BaseCampEntity{
-	
+public class Comments extends BaseCampEntity {
+
 	private List<Comment> items = new ArrayList<Comment>();
 	private int commentCount = 0;
 
@@ -22,25 +22,30 @@ public class Comments extends BaseCampEntity{
 	 * 
 	 * Get All Comments for given resource (up to 50)
 	 * 
-	 * @param auth	BCAuth
-	 * @param resourceType	String	type of resource example... "posts" , "milestones" , "todo_items"
-	 * @param resourceId	int		id of resource
+	 * @param auth
+	 *            BCAuth
+	 * @param resourceType
+	 *            String type of resource example... "posts" , "milestones" ,
+	 *            "todo_items"
+	 * @param resourceId
+	 *            int id of resource
 	 */
 	public Comments(BCAuth auth, String resourceType, int resourceId) {
 		super(auth);
-		
-		Element commentsElement = super.get("/"+resourceType+"/"+resourceId+"/comments.xml");
-		//get NodeList
+
+		Element commentsElement = super.get("/" + resourceType + "/" + resourceId + "/comments.xml");
+		// get NodeList
 		NodeList nl = commentsElement.getElementsByTagName("comment");
-		
-		for (int i=0;i<nl.getLength();i++) {
+
+		for (int i = 0; i < nl.getLength(); i++) {
 			Element commentElement = (Element) nl.item(i);
 			Comment comment = new Comment(auth, commentElement);
 			this.items.add(comment);
 			this.commentCount++;
 		}
-		
+
 	}
+
 	/***
 	 * 
 	 * @return List<Comment> collection of Comment objects
@@ -48,16 +53,18 @@ public class Comments extends BaseCampEntity{
 	public List<Comment> getComments() {
 		return this.items;
 	}
-	
+
 	/***
 	 * Get comment according to index
-	 * @param index	index of Comment
-	 * @return	Comment
+	 * 
+	 * @param index
+	 *            index of Comment
+	 * @return Comment
 	 */
 	public Comment getComment(int index) {
 		return this.items.get(index);
 	}
-	
+
 	/***
 	 * 
 	 * @return count of Comments in collection

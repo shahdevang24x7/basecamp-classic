@@ -2,123 +2,128 @@ package api.basecamp;
 
 import org.w3c.dom.Element;
 
-public class Category extends BaseCampEntity{
+public class Category extends BaseCampEntity {
 
-	private int		id;
-	private String	name;
-	private int		projectId;
-	private int		itemCount;
-	private boolean	type;
-	
-	static public final boolean POST 	= true;
-	static public final boolean ATTACH	= false;
-	
+	private int id;
+	private String name;
+	private int projectId;
+	private int itemCount;
+	private boolean type;
+
+	static public final boolean POST = true;
+	static public final boolean ATTACH = false;
+
 	/***
 	 * Get Category By ID
-	 * @param auth			BCAuth Object
-	 * @param categoryId	ID of desired Category
+	 * 
+	 * @param auth
+	 *            BCAuth Object
+	 * @param categoryId
+	 *            ID of desired Category
 	 */
 	public Category(BCAuth auth, int categoryId) {
 		super(auth);
-		
-		Element catElement = super.get("/categories/"+categoryId+".xml");
-		
-		this.id 		= ElementValue.getIntValue(catElement, "id");
-		this.name 		= ElementValue.getTextValue(catElement, "name");
-		this.projectId 	= ElementValue.getIntValue(catElement, "project-id");
-		this.itemCount 	= ElementValue.getIntValue(catElement, "element-count");
+
+		Element catElement = super.get("/categories/" + categoryId + ".xml");
+
+		this.id = ElementValue.getIntValue(catElement, "id");
+		this.name = ElementValue.getTextValue(catElement, "name");
+		this.projectId = ElementValue.getIntValue(catElement, "project-id");
+		this.itemCount = ElementValue.getIntValue(catElement, "element-count");
 		String tempType = ElementValue.getTextValue(catElement, "type");
-		
-		if ( tempType == "post") {
+
+		if (tempType == "post") {
 			this.type = Category.POST;
-		}
-		else if ( tempType == "attachment" ) {
+		} else if (tempType == "attachment") {
 			this.type = Category.ATTACH;
 		}
 	}
-	
+
 	/***
 	 * Create new category
 	 * 
-	 * @param auth			BCAuth Object
-	 * @param projectId	 	Project ID you want category to be attached to
-	 * @param categoryType	Category Type [ Category.POST || Category.ATTACH ]
-	 * @param categoryName	Name of Category
+	 * @param auth
+	 *            BCAuth Object
+	 * @param projectId
+	 *            Project ID you want category to be attached to
+	 * @param categoryType
+	 *            Category Type [ Category.POST || Category.ATTACH ]
+	 * @param categoryName
+	 *            Name of Category
 	 */
 	public Category(BCAuth auth, int projectId, boolean categoryType, String categoryName) {
 		super(auth);
-		
+
 		String typeString = type ? "post" : "attachment";
 		String request;
-		
-		request  = "<category>";
-		request += "<type>"+typeString+"</type>";
-		request += "<name>"+categoryName+"</name>";
+
+		request = "<category>";
+		request += "<type>" + typeString + "</type>";
+		request += "<name>" + categoryName + "</name>";
 		request += "</category>";
-		
-		int createdId = super.post("/projects/"+projectId+"/categories.xml", request);
-		
-		Element catElement = super.get("/projects/"+createdId+".xml");
-		
-		this.id 		= ElementValue.getIntValue(catElement, "id");
-		this.name 		= ElementValue.getTextValue(catElement, "name");
-		this.projectId 	= ElementValue.getIntValue(catElement, "project-id");
-		this.itemCount 	= ElementValue.getIntValue(catElement, "element-count");
+
+		int createdId = super.post("/projects/" + projectId + "/categories.xml", request);
+
+		Element catElement = super.get("/projects/" + createdId + ".xml");
+
+		this.id = ElementValue.getIntValue(catElement, "id");
+		this.name = ElementValue.getTextValue(catElement, "name");
+		this.projectId = ElementValue.getIntValue(catElement, "project-id");
+		this.itemCount = ElementValue.getIntValue(catElement, "element-count");
 		String tempType = ElementValue.getTextValue(catElement, "type");
-		
-		if ( tempType == "post") {
+
+		if (tempType == "post") {
 			this.type = Category.POST;
-		}
-		else if ( tempType == "attachment" ) {
+		} else if (tempType == "attachment") {
 			this.type = Category.ATTACH;
 		}
 	}
-	
+
 	/***
 	 * Build Project from XML Element
 	 * 
 	 * (Internal Use Only)
 	 * 
-	 * @param auth				BCAuth Object
-	 * @param projectElement	XML Element representation of Project
+	 * @param auth
+	 *            BCAuth Object
+	 * @param projectElement
+	 *            XML Element representation of Project
 	 */
 	Category(BCAuth auth, Element catElement) {
 		super(auth);
-		
-		this.id 		= ElementValue.getIntValue(catElement, "id");
-		this.name 		= ElementValue.getTextValue(catElement, "name");
-		this.projectId 	= ElementValue.getIntValue(catElement, "project-id");
-		this.itemCount 	= ElementValue.getIntValue(catElement, "element-count");
+
+		this.id = ElementValue.getIntValue(catElement, "id");
+		this.name = ElementValue.getTextValue(catElement, "name");
+		this.projectId = ElementValue.getIntValue(catElement, "project-id");
+		this.itemCount = ElementValue.getIntValue(catElement, "element-count");
 		String tempType = ElementValue.getTextValue(catElement, "type");
-		
-		if ( tempType == "post") {
+
+		if (tempType == "post") {
 			this.type = Category.POST;
-		}
-		else if ( tempType == "attachment" ) {
+		} else if (tempType == "attachment") {
 			this.type = Category.ATTACH;
 		}
-		
+
 	}
-	
+
 	/***
 	 * 
 	 * Update the Category in its current state (only Name editable)
-	 *  
-	 * @return	Boolean depending on success of operation
+	 * 
+	 * @return Boolean depending on success of operation
 	 */
 	public boolean save() {
-			
+
 		String request;
-		
-		request  = "<category>";
-		request += "<name>"+this.name+"</name>";
+
+		request = "<category>";
+		request += "<name>" + this.name + "</name>";
 		request += "</category>";
-			
-		return super.put("/categories/"+this.id+".xml", request);
-			
-		
+
+		return super.put("/categories/" + this.id + ".xml", request);
+
 	}
-	
+
 	/***
 	 * 
 	 * Delete this Category from the BaseCamp System
@@ -126,13 +131,13 @@ public class Category extends BaseCampEntity{
 	 * @return Boolean depending on operation success
 	 */
 	public boolean trash() {
-		 
-		return super.delete("/categories/"+this.id+".xml");
-		
+
+		return super.delete("/categories/" + this.id + ".xml");
+
 	}
 
-	//--- Getters
-	
+	// --- Getters
+
 	/**
 	 * @return the id
 	 */
@@ -167,20 +172,15 @@ public class Category extends BaseCampEntity{
 	public boolean isType() {
 		return type;
 	}
-	
-	//--- Setters
+
+	// --- Setters
 
 	/**
-	 * @param name the name to set
+	 * @param name
+	 *            the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	
 
-	
-	
-	
-	
 }

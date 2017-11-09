@@ -12,55 +12,56 @@ import org.w3c.dom.NodeList;
  *
  */
 public class Account extends BaseCampEntity {
-	
-	//--- BaseCamp Account
-	private Calendar 	createdAt;
-	private int 		id;
-	private Calendar 	updatedAt;
-	private String 		companyName;
-	private int 		accountHolderId;
-	private boolean 	isSsl;
-	private boolean 	isTimeTracking;
-	private boolean 	isEmailNotify;
-	private int 		storage;
-	private int 		primaryCompanyId;
-	
-	//--- Account Subscription information
+
+	// --- BaseCamp Account
+	private Calendar createdAt;
+	private int id;
+	private Calendar updatedAt;
+	private String companyName;
+	private int accountHolderId;
+	private boolean isSsl;
+	private boolean isTimeTracking;
+	private boolean isEmailNotify;
+	private int storage;
+	private int primaryCompanyId;
+
+	// --- Account Subscription information
 	public Subscription subscription;
-	
+
 	/***
 	 * Initializes Account object with given auth info
 	 * 
-	 * @param auth	General BaseCamp account information object
+	 * @param auth
+	 *            General BaseCamp account information object
 	 */
 	public Account(BCAuth auth) {
-		
+
 		super(auth);
-		
+
 		Element accountElement = super.get("/account.xml");
-		
-		//load up Account 
-		this.createdAt 		  = ElementValue.getDateTimeValue(accountElement, "created-at");
-		this.id 		  	  = ElementValue.getIntValue(accountElement,  "id");
-		this.updatedAt 		  = ElementValue.getDateTimeValue(accountElement, "updated-at");
-		this.companyName 	  = ElementValue.getTextValue(accountElement, "name");
-		this.accountHolderId  = ElementValue.getIntValue(accountElement,  "account-holder-id");
-		this.isSsl 			  = ElementValue.getBoolValue(accountElement, "ssl-enabled");
-		this.isTimeTracking   = ElementValue.getBoolValue(accountElement, "time-tracking-enabled");
-		this.isEmailNotify 	  = ElementValue.getBoolValue(accountElement, "email-notification-enabled");
-		this.storage 		  = ElementValue.getIntValue(accountElement,  "storage");
-		this.primaryCompanyId = ElementValue.getIntValue(accountElement,  "primary-company-id");
-		
-		//get 'subscription' sub element
+
+		// load up Account
+		this.createdAt = ElementValue.getDateTimeValue(accountElement, "created-at");
+		this.id = ElementValue.getIntValue(accountElement, "id");
+		this.updatedAt = ElementValue.getDateTimeValue(accountElement, "updated-at");
+		this.companyName = ElementValue.getTextValue(accountElement, "name");
+		this.accountHolderId = ElementValue.getIntValue(accountElement, "account-holder-id");
+		this.isSsl = ElementValue.getBoolValue(accountElement, "ssl-enabled");
+		this.isTimeTracking = ElementValue.getBoolValue(accountElement, "time-tracking-enabled");
+		this.isEmailNotify = ElementValue.getBoolValue(accountElement, "email-notification-enabled");
+		this.storage = ElementValue.getIntValue(accountElement, "storage");
+		this.primaryCompanyId = ElementValue.getIntValue(accountElement, "primary-company-id");
+
+		// get 'subscription' sub element
 		NodeList nl = accountElement.getElementsByTagName("subscription");
-		Element subscriptionElement = (Element)nl.item(0);
-				
-		//Create new Subscription object from inner element
+		Element subscriptionElement = (Element) nl.item(0);
+
+		// Create new Subscription object from inner element
 		this.subscription = new Subscription(subscriptionElement);
-		
+
 	}
 
-	//--- Getters
+	// --- Getters
 
 	/**
 	 * @return the createdAt
@@ -139,38 +140,36 @@ public class Account extends BaseCampEntity {
 		return subscription;
 	}
 
-
-
-
-	//--- Subscription Class
+	// --- Subscription Class
 	public class Subscription {
-		
+
 		private boolean isTimeTracking;
-		private long    storage;
-		private String	name;
-		private boolean	isSsl;
-		private String	writeboards;
-		private int		projects;
-		
+		private long storage;
+		private String name;
+		private boolean isSsl;
+		private String writeboards;
+		private int projects;
+
 		/***
 		 * Initializes Inner Subscription object with the Account
 		 * 
 		 * (Internal Use Only)
 		 * 
-		 * @param subscription	Subscription element used to build subscription object.
+		 * @param subscription
+		 *            Subscription element used to build subscription object.
 		 */
 		public Subscription(Element subscription) {
-			
+
 			this.isTimeTracking = ElementValue.getBoolValue(subscription, "time-tracking");
-			this.storage 		= ElementValue.getLongValue(subscription, "storage");
-			this.name 			= ElementValue.getTextValue(subscription, "name");
-			this.isSsl 			= ElementValue.getBoolValue(subscription, "ssl");
-			this.writeboards 	= ElementValue.getTextValue(subscription, "writeboards");
-			this.projects 		= ElementValue.getIntValue(subscription, "projects");
-			
+			this.storage = ElementValue.getLongValue(subscription, "storage");
+			this.name = ElementValue.getTextValue(subscription, "name");
+			this.isSsl = ElementValue.getBoolValue(subscription, "ssl");
+			this.writeboards = ElementValue.getTextValue(subscription, "writeboards");
+			this.projects = ElementValue.getIntValue(subscription, "projects");
+
 		}
-		
-		//--- Getters
+
+		// --- Getters
 
 		/**
 		 * @return the isTimeTracking
@@ -213,7 +212,6 @@ public class Account extends BaseCampEntity {
 		public int getProjects() {
 			return projects;
 		}
-		
 
 	}
 }

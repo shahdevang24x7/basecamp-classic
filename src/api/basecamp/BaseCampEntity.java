@@ -1,5 +1,6 @@
 package api.basecamp;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -11,8 +12,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import sun.misc.BASE64Encoder;
-
 /***
  * Base for building out BaseCamp Entities
  * 
@@ -21,260 +20,199 @@ import sun.misc.BASE64Encoder;
  * @author jondavidjohn
  */
 abstract class BaseCampEntity {
-	
-	//--- User / Company Authentication information
-	private String username;
-	private String password;
-    private String baseUrl;
-	
+
+	// --- Authentication information
+	private BCAuth auth;
+
 	protected BaseCampEntity(BCAuth auth) {
-		
-		this.username = auth.username;
-		this.password = auth.password;
-		this.baseUrl  = auth.company+".basecamphq.com";
-		
-		//Attach http/https
-		if (auth.useSsl) { this.baseUrl = "https://"+baseUrl; }
-		else 	         { this.baseUrl = "http://"+baseUrl; }
-		
+		this.auth = auth;
 	}
-	
-	//--- Base REST interaction methods
-	
+
+	/**
+	 * Prepare connection and set authorization details from BCAuth
+	 * 
+	 * @author devang.shah
+	 * 
+	 * @param connection
+	 * @param request
+	 * @param requestMethod
+	 * @return
+	 * @throws IOException
+	 */
+	public HttpURLConnection prepareConnection(String request, String requestMethod) throws IOException {
+		URL url = new URL(auth.getBaseUrl() + request);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.setRequestMethod(requestMethod);
+		Decoder.BASE64Encoder enc = new Decoder.BASE64Encoder();
+		if (auth.hasToken()) {
+			String token = auth.getTokenKey();
+			String encodedAuthorization = enc.encode(token.getBytes());
+			connection.setRequestProperty("Authorization", "Client-ID " + encodedAuthorization);
+		} else {
+			String userpassword = auth.getUsername() + ":" + auth.getPassword();
+			String encodedAuthorization = enc.encode(userpassword.getBytes());
+			connection.setRequestProperty("Authorization", "Basic " + encodedAuthorization);
+		}
+		connection.setRequestProperty("Content-type", "application/xml");
+		connection.setRequestProperty("Accept", "application/xml");
+		return connection;
+	}
+
+	// --- Base REST interaction methods
+
 	/***
 	 * GET HTTP Operation
 	 * 
-	 * @param	request	Request URI	
-	 * @return	Element Root Element of XML Response
+	 * @param request
+	 *            Request URI
+	 * @return Element Root Element of XML Response
 	 */
 	protected Element get(String request) {
-		
 		HttpURLConnection connection = null;
-		
-		Element rootElement;
-		
+
+		Element rootElement = null;
+
 		try {
-	
-	        URL url = new URL(this.baseUrl + request);
-	        connection = (HttpURLConnection) url.openConnection();
-	        connection.setRequestMethod("GET");
-	        BASE64Encoder enc = new sun.misc.BASE64Encoder();
-	        String userpassword = this.username + ":" + this.password;
-	        String encodedAuthorization = enc.encode( userpassword.getBytes() );
-	        connection.setRequestProperty("Authorization", "Basic "+ encodedAuthorization);
-	        connection.setRequestProperty("Content-type", "application/xml");
-	        connection.setRequestProperty("Accept", "application/xml");
-	        
-	        InputStream responseStream = connection.getInputStream();
-	        
-	        //--- Parse XML response InputStream into DOM
-	        
-	        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	        DocumentBuilder db = dbf.newDocumentBuilder();
-	        
-	        Document doc = db.parse(responseStream);
-	        
-	        rootElement = doc.getDocumentElement();
-	        
-		} catch(Exception e) {
-			
-			System.out.print(e.toString());
-			rootElement = null;
-			
+			connection = prepareConnection(request, "GET");
+
+			InputStream responseStream = connection.getInputStream();
+
+			// --- Parse XML response InputStream into DOM
+
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.parse(responseStream);
+			rootElement = doc.getDocumentElement();
+
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
 		} finally {
-	        
-			if(connection != null) {
-	            connection.disconnect(); 
-	        }
-		
+			if (connection != null) {
+				connection.disconnect();
+			}
 		}
-		
 		return rootElement;
 	}
-	
+
 	/***
 	 * POST HTTP Operation
 	 * 
-	 * @param	request	Request URI	
-	 * @param	POST Data in String form
-	 * @return	int ID of inserted (posted) element
+	 * @param request
+	 *            Request URI
+	 * @param POST
+	 *            Data in String form
+	 * @return int ID of inserted (posted) element
 	 */
-	protected int post(String requestURL, String requestData) {
-		
+	protected int post(String request, String requestData) {
+
 		HttpURLConnection connection = null;
 
-		int itemID;
-		
+		int itemID = 0;
+
 		try {
-	
-	        URL url = new URL(this.baseUrl + requestURL);
-	        connection = (HttpURLConnection) url.openConnection();
-	        connection.setRequestMethod("POST");
-	        BASE64Encoder enc = new sun.misc.BASE64Encoder();
-	        String userpassword = this.username + ":" + this.password;
-	        String encodedAuthorization = enc.encode( userpassword.getBytes() );
-	        connection.setRequestProperty("Authorization", "Basic "+ encodedAuthorization);
-	        connection.setRequestProperty("Content-type", "application/xml");
-	        connection.setRequestProperty("Accept", "application/xml");
-	        
-	        //--- Send POST data
-	        connection.setDoOutput(true);
-	        OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-	        wr.write(requestData);
-	        wr.flush();
-	        wr.close();
-	        
-	        String responseHeader = connection.getHeaderField(0);
-	        String[] headerArray = responseHeader.split(" ");
-	        
-	        int responseCode = Integer.parseInt(headerArray[1]);
-	        
-	        if (responseCode == 201) {
-	        	String locationURL = connection.getHeaderField("Location");
-	        	String[] locationArray = locationURL.split("/");
-	        	itemID = Integer.parseInt(locationArray[locationArray.length - 1].replace(".xml",""));
-	        }
-	        else {
-	        	
-	        	itemID = 0;
-	        
-	        }
-	        
-	        
-		} catch(Exception e) {
-			
-			System.out.print(e.toString());
-			itemID = 0;
-			
+			connection = prepareConnection(request, "POST");
+
+			// --- Send POST data
+			connection.setDoOutput(true);
+			OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
+			wr.write(requestData);
+			wr.flush();
+			wr.close();
+
+			String responseHeader = connection.getHeaderField(0);
+			String[] headerArray = responseHeader.split(" ");
+			int responseCode = Integer.parseInt(headerArray[1]);
+			if (responseCode == 201) {
+				String locationURL = connection.getHeaderField("Location");
+				String[] locationArray = locationURL.split("/");
+				itemID = Integer.parseInt(locationArray[locationArray.length - 1].replace(".xml", ""));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
 		} finally {
-	        
-			if(connection != null) {
-	            connection.disconnect(); 
-	        }
-		
+			if (connection != null) {
+				connection.disconnect();
+			}
 		}
-		
+
 		return itemID;
 	}
-	
+
 	/***
 	 * PUT HTTP OPERATION
 	 * 
-	 * @param	request	Request URI	
-	 * @param	POST Data in String form
-	 * @return	Boolean if operation was successful
+	 * @param request
+	 *            Request URI
+	 * @param POST
+	 *            Data in String form
+	 * @return Boolean if operation was successful
 	 */
-	protected boolean put(String requestURL, String requestData) {
-		
+	protected boolean put(String request, String requestData) {
+
 		HttpURLConnection connection = null;
 
-		boolean response;
-		
+		boolean response = false;
+
 		try {
-	
-	        URL url = new URL(this.baseUrl + requestURL);
-	        connection = (HttpURLConnection) url.openConnection();
-	        connection.setRequestMethod("PUT");
-	        BASE64Encoder enc = new sun.misc.BASE64Encoder();
-	        String userpassword = this.username + ":" + this.password;
-	        String encodedAuthorization = enc.encode( userpassword.getBytes() );
-	        connection.setRequestProperty("Authorization", "Basic "+ encodedAuthorization);
-	        connection.setRequestProperty("Content-type", "application/xml");
-	        connection.setRequestProperty("Accept", "application/xml");
-	        
-	        //--- Send POST data
-	        connection.setDoOutput(true);
-	        OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-	        wr.write(requestData);
-	        wr.flush();
-	        wr.close();
-	        	        
-	        String responseHeader = connection.getHeaderField(0);
-	        String[] headerArray = responseHeader.split(" ");
-	        
-	        int responseCode = Integer.parseInt(headerArray[1]);
-	        
-	        if (responseCode == 200) {
-	        	
-	        	response = true;
-	        	
-	        }
-	        else {
-	        	
-	        	response = false;
-	        
-	        }
-	        
-		} catch(Exception e) {
-			
-			System.out.print(e.toString());
-			response = false;
-			
+			connection = prepareConnection(request, "PUT");
+
+			// --- Send POST data
+			connection.setDoOutput(true);
+			OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
+			wr.write(requestData);
+			wr.flush();
+			wr.close();
+
+			String responseHeader = connection.getHeaderField(0);
+			String[] headerArray = responseHeader.split(" ");
+			int responseCode = Integer.parseInt(headerArray[1]);
+			if (responseCode == 200) {
+				response = true;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
 		} finally {
-	        
-			if(connection != null) {
-	            connection.disconnect(); 
-	        }
-		
+			if (connection != null) {
+				connection.disconnect();
+			}
 		}
-		
+
 		return response;
 	}
 
 	/***
 	 * DELETE HTTP OPERATION
 	 * 
-	 * @param	request	Request URI	
-	 * @return	Boolean success
+	 * @param request
+	 *            Request URI
+	 * @return Boolean success
 	 */
 	protected boolean delete(String request) {
-		
-		HttpURLConnection connection = null;
-		
-		boolean response;
-		
-		try {
-						
-	        URL url = new URL(this.baseUrl + request);
-	        connection = (HttpURLConnection) url.openConnection();
-	        connection.setRequestMethod("DELETE");
-	        BASE64Encoder enc = new sun.misc.BASE64Encoder();
-	        String userpassword = this.username + ":" + this.password;
-	        String encodedAuthorization = enc.encode( userpassword.getBytes() );
-	        connection.setRequestProperty("Authorization", "Basic "+ encodedAuthorization);
-	        connection.setRequestProperty("Content-type", "application/xml");
-	        connection.setRequestProperty("Accept", "application/xml");
-	        
-	        String responseHeader = connection.getHeaderField(0);
-	        String[] headerArray = responseHeader.split(" ");
-	        
-	        int responseCode = Integer.parseInt(headerArray[1]);
-	        
-	        if (responseCode == 200) {
-	        	
-	        	response = true;
-	        	
-	        }
-	        else {
-	        	
-	        	response = false;
-	        
-	        }
 
-	        
-		} catch(Exception e) {
-			
-			System.out.print(e.toString());
-			response = false;
-			
+		HttpURLConnection connection = null;
+
+		boolean response = false;
+
+		try {
+			connection = prepareConnection(request, "DELETE");
+
+			String responseHeader = connection.getHeaderField(0);
+			String[] headerArray = responseHeader.split(" ");
+			int responseCode = Integer.parseInt(headerArray[1]);
+			if (responseCode == 200) {
+				response = true;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
 		} finally {
-	        
-			if(connection != null) {
-	            connection.disconnect(); 
-	        }
-		
+			if (connection != null) {
+				connection.disconnect();
+			}
 		}
-		
+
 		return response;
 	}
 
